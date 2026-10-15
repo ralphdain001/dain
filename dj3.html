@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ralph Music Player</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background:
+        radial-gradient(circle at top, #202020, #050505 65%);
+    color: white;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    padding: 25px 15px;
+    background: linear-gradient(90deg, #050505, #181818, #050505);
+    border-bottom: 2px solid #333;
+}
+
+header h1 {
+    font-size: 32px;
+    letter-spacing: 2px;
+}
+
+header p {
+    color: #aaa;
+    margin-top: 8px;
+}
+
+/* MAIN PLAYER */
+
+.main-player {
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 25px;
+    background: rgba(20,20,20,.95);
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0,0,0,.7);
+}
+
+.now-playing {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.cover {
+    width: 180px;
+    height: 180px;
+    margin: auto;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle, #555 0 8%, #111 9% 15%, #333 16% 20%, #090909 21%);
+    border: 8px solid #222;
+    box-shadow: 0 0 30px #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+}
+
+#songTitle {
+    margin-top: 18px;
+    font-size: 22px;
+    color: #00eaff;
+}
+
+.time-row {
+    display: flex;
+    justify-content: space-between;
+    color: #aaa;
+    margin-top: 8px;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+#progress {
+    margin-top: 15px;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 16px;
+    background: #222;
+    color: white;
+    cursor: pointer;
+    transition: .2s;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #00a8bb;
+    transform: translateY(-2px);
+}
+
+button.active {
+    background: red;
+}
+
+.volume-area {
+    max-width: 400px;
+    margin: 20px auto 0;
+    text-align: center;
+}
+
+.volume-area label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* SECTIONS */
+
+.section {
+    max-width: 1200px;
+    margin: 25px auto;
+    padding: 20px;
+    background: rgba(18,18,18,.96);
+    border-radius: 18px;
+    border: 1px solid #292929;
+}
+
+.section-title {
+    font-size: 22px;
+    color: #00eaff;
+    margin-bottom: 18px;
+}
+
+.top-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+/* LIBRARY */
+
+.library-list,
+.queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.track,
+.queue-track {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #101010;
+    border: 1px solid #292929;
+    border-radius: 10px;
+}
+
+.track-name,
+.queue-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track button,
+.queue-track button {
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+/* QUEUE */
+
+.queue-section {
+    border: 2px solid #00a8bb;
+}
+
+.queue-number {
+    width: 30px;
+    color: #00eaff;
+    font-weight: bold;
+    text-align: center;
+}
+
+.queue-playing {
+    border-color: red;
+    box-shadow: 0 0 10px rgba(255,0,0,.5);
+}
+
+.empty {
+    color: #777;
+    text-align: center;
+    padding: 20px;
+}
+
+/* DJ */
+
+.dj-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.deck {
+    background: #090909;
+    border: 1px solid #333;
+    padding: 20px;
+    border-radius: 18px;
+}
+
+.deck h3 {
+    color: #00eaff;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.jog {
+    width: 180px;
+    height: 180px;
+    margin: 15px auto;
+    border-radius: 50%;
+    background:
+        repeating-radial-gradient(
+            circle,
+            #111 0px,
+            #111 5px,
+            #202020 6px,
+            #111 9px
+        );
+    border: 10px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 0 20px #000;
+}
+
+.jog:active {
+    cursor: grabbing;
+}
+
+.jog-center {
+    width: 60px;
+    height: 60px;
+    background: #111;
+    border-radius: 50%;
+    border: 3px solid #00eaff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deck-title {
+    text-align: center;
+    color: #aaa;
+    margin-bottom: 15px;
+    min-height: 20px;
+}
+
+.deck-controls {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.slider-group {
+    margin-top: 15px;
+}
+
+.slider-group label {
+    display: block;
+    color: #aaa;
+    margin-bottom: 5px;
+}
+
+/* MIXER */
+
+.mixer {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
+.mixer-box {
+    background: #0c0c0c;
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.mixer-box h3 {
+    color: #00eaff;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.eq-control {
+    margin: 12px 0;
+}
+
+.eq-control label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+/* EFFECTS */
+
+.effects {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.effect.active {
+    background: red;
+}
+
+/* RESPONSIVE */
+
+@media(max-width: 800px) {
+    .dj-container,
+    .mixer {
+        grid-template-columns: 1fr;
+    }
+
+    .track,
+    .queue-track {
+        flex-wrap: wrap;
+    }
+
+    .track-name,
+    .queue-name {
+        width: 100%;
+        flex-basis: 100%;
+    }
+}
+
+@media(max-width: 500px) {
+    header h1 {
+        font-size: 24px;
+    }
+
+    .main-player,
+    .section {
+        margin: 12px;
+        padding: 15px;
+    }
+
+    .cover {
+        width: 140px;
+        height: 140px;
+    }
+
+    .jog {
+        width: 145px;
+        height: 145px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎧 RALPH MUSIC PLAYER</h1>
+    <p>Music Player + Virtual DJ Studio</p>
+</header>
+
+<!-- MAIN MUSIC PLAYER -->
+
+<div class="main-player">
+
+    <div class="now-playing">
+
+        <div class="cover">🎵</div>
+
+        <h2 id="songTitle">No song loaded</h2>
+
+    </div>
+
+    <input type="range" id="progress" min="0" max="100" value="0">
+
+    <div class="time-row">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+    </div>
+
+    <div class="controls">
+
+        <button id="prevBtn">⏮ PREVIOUS</button>
+
+        <button id="playBtn">▶ PLAY</button>
+
+        <button id="nextBtn">NEXT ⏭</button>
+
+        <button id="shuffleBtn">🔀 SHUFFLE</button>
+
+        <button id="repeatBtn">🔁 REPEAT</button>
+
+        <button id="muteBtn">🔇 MUTE</button>
+
+    </div>
+
+    <div class="volume-area">
+
+        <label>🔊 MASTER VOLUME</label>
+
+        <input
+            type="range"
+            id="volume"
+            min="0"
+            max="1"
+            step="0.01"
+            value="1"
+        >
+
+    </div>
+
+</div>
+
+
+<!-- MUSIC LIBRARY -->
+
+<div class="section">
+
+    <div class="section-title">🎵 MUSIC LIBRARY</div>
+
+    <div class="top-buttons">
+
+        <button id="loadMusicBtn">➕ LOAD MUSIC</button>
+
+        <input
+            type="file"
+            id="musicInput"
+            accept="audio/*"
+            multiple
+            hidden
+        >
+
+    </div>
+
+    <div id="libraryList" class="library-list">
+
+        <div class="empty">
+            No music loaded yet.
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- QUEUE -->
+
+<div class="section queue-section">
+
+    <div class="section-title">📋 PLAY QUEUE</div>
+
+    <div class="top-buttons">
+
+        <button id="playQueueBtn">
+            ▶ PLAY QUEUE
+        </button>
+
+        <button id="clearQueueBtn">
+            🗑 CLEAR QUEUE
+        </button>
+
+    </div>
+
+    <div id="queueList" class="queue-list">
+
+        <div class="empty">
+            Queue is empty.
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- VIRTUAL DJ -->
+
+<div class="section">
+
+    <div class="section-title">
+        🎚️ VIRTUAL DJ DECKS
+    </div>
+
+    <div class="dj-container">
+
+        <!-- DECK A -->
+
+        <div class="deck">
+
+            <h3>DECK A</h3>
+
+            <div id="deckATitle" class="deck-title">
+                No track loaded
+            </div>
+
+            <div class="jog" id="jogA">
+                <div class="jog-center">A</div>
+            </div>
+
+            <div class="deck-controls">
+
+                <button id="loadABtn">
+                    LOAD A
+                </button>
+
+                <button id="playABtn">
+                    ▶ PLAY
+                </button>
+
+                <button id="cueABtn">
+                    CUE
+                </button>
+
+                <button id="stopABtn">
+                    ■ STOP
+                </button>
+
+            </div>
+
+            <div class="slider-group">
+
+                <label>
+                    Volume A
+                    <span id="volAValue">100%</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="volA"
+                    min="0"
+                    max="1"
+                    step=".01"
+                    value="1"
+                >
+
+            </div>
+
+            <div class="slider-group">
+
+                <label>
+                    Pitch A
+                    <span id="pitchAValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="pitchA"
+                    min="-12"
+                    max="12"
+                    value="0"
+                >
+
+            </div>
+
+            <div class="slider-group">
+
+                <label>
+                    Tempo A
+                </label>
+
+                <input
+                    type="range"
+                    id="tempoA"
+                    min=".5"
+                    max="1.5"
+                    step=".01"
+                    value="1"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- DECK B -->
+
+        <div class="deck">
+
+            <h3>DECK B</h3>
+
+            <div id="deckBTitle" class="deck-title">
+                No track loaded
+            </div>
+
+            <div class="jog" id="jogB">
+                <div class="jog-center">B</div>
+            </div>
+
+            <div class="deck-controls">
+
+                <button id="loadBBtn">
+                    LOAD B
+                </button>
+
+                <button id="playBBtn">
+                    ▶ PLAY
+                </button>
+
+                <button id="cueBBtn">
+                    CUE
+                </button>
+
+                <button id="stopBBtn">
+                    ■ STOP
+                </button>
+
+            </div>
+
+            <div class="slider-group">
+
+                <label>
+                    Volume B
+                    <span id="volBValue">100%</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="volB"
+                    min="0"
+                    max="1"
+                    step=".01"
+                    value="1"
+                >
+
+            </div>
+
+            <div class="slider-group">
+
+                <label>
+                    Pitch B
+                    <span id="pitchBValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="pitchB"
+                    min="-12"
+                    max="12"
+                    value="0"
+                >
+
+            </div>
+
+            <div class="slider-group">
+
+                <label>
+                    Tempo B
+                </label>
+
+                <input
+                    type="range"
+                    id="tempoB"
+                    min=".5"
+                    max="1.5"
+                    step=".01"
+                    value="1"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MIXER -->
+
+<div class="section">
+
+    <div class="section-title">
+        🎛️ DJ MIXER
+    </div>
+
+    <div class="mixer">
+
+        <!-- A EQ -->
+
+        <div class="mixer-box">
+
+            <h3>DECK A EQ</h3>
+
+            <div class="eq-control">
+
+                <label>
+                    Bass
+                    <span id="bassAValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="bassA"
+                    min="-10"
+                    max="10"
+                    value="0"
+                >
+
+            </div>
+
+            <div class="eq-control">
+
+                <label>
+                    Mid
+                    <span id="midAValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="midA"
+                    min="-10"
+                    max="10"
+                    value="0"
+                >
+
+            </div>
+
+            <div class="eq-control">
+
+                <label>
+                    Treble
+                    <span id="trebleAValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="trebleA"
+                    min="-10"
+                    max="10"
+                    value="0"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- CENTER MIXER -->
+
+        <div class="mixer-box">
+
+            <h3>CROSS FADER</h3>
+
+            <input
+                type="range"
+                id="crossfader"
+                min="0"
+                max="100"
+                value="50"
+            >
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                margin-top:8px;
+                color:#aaa;
+            ">
+                <span>A</span>
+                <span>B</span>
+            </div>
+
+            <h3 style="margin-top:25px;">
+                MASTER
+            </h3>
+
+            <input
+                type="range"
+                id="masterVolume"
+                min="0"
+                max="1"
+                step=".01"
+                value="1"
+            >
+
+        </div>
+
+
+        <!-- B EQ -->
+
+        <div class="mixer-box">
+
+            <h3>DECK B EQ</h3>
+
+            <div class="eq-control">
+
+                <label>
+                    Bass
+                    <span id="bassBValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="bassB"
+                    min="-10"
+                    max="10"
+                    value="0"
+                >
+
+            </div>
+
+            <div class="eq-control">
+
+                <label>
+                    Mid
+                    <span id="midBValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="midB"
+                    min="-10"
+                    max="10"
+                    value="0"
+                >
+
+            </div>
+
+            <div class="eq-control">
+
+                <label>
+                    Treble
+                    <span id="trebleBValue">0</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="trebleB"
+                    min="-10"
+                    max="10"
+                    value="0"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- EFFECTS -->
+
+<div class="section">
+
+    <div class="section-title">
+        ✨ DJ EFFECTS
+    </div>
+
+    <div class="effects">
+
+        <button class="effect" id="echoBtn">
+            ECHO
+        </button>
+
+        <button class="effect" id="reverbBtn">
+            REVERB
+        </button>
+
+        <button class="effect" id="filterBtn">
+            FILTER
+        </button>
+
+        <button class="effect" id="bassBoostBtn">
+            BASS BOOST
+        </button>
+
+        <button id="resetEffectsBtn">
+            RESET EFFECTS
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   MAIN AUDIO PLAYER
+========================================================= */
+
+const audio = new Audio();
+
+let tracks = [];
+let currentIndex = -1;
+
+let shuffle = false;
+let repeat = false;
+let muted = false;
+
+
+/* =========================================================
+   QUEUE SYSTEM
+========================================================= */
+
+let queue = [];
+let queueIndex = -1;
+let queueMode = false;
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const songTitle = document.getElementById("songTitle");
+const playBtn = document.getElementById("playBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+const progress = document.getElementById("progress");
+
+const currentTimeDisplay =
+    document.getElementById("currentTime");
+
+const durationDisplay =
+    document.getElementById("duration");
+
+const volume =
+    document.getElementById("volume");
+
+const muteBtn =
+    document.getElementById("muteBtn");
+
+const shuffleBtn =
+    document.getElementById("shuffleBtn");
+
+const repeatBtn =
+    document.getElementById("repeatBtn");
+
+const libraryList =
+    document.getElementById("libraryList");
+
+const queueList =
+    document.getElementById("queueList");
+
+
+/* =========================================================
+   LOAD MUSIC
+========================================================= */
+
+document
+.getElementById("loadMusicBtn")
+.addEventListener("click", () => {
+
+    document
+    .getElementById("musicInput")
+    .click();
+
+});
+
+
+document
+.getElementById("musicInput")
+.addEventListener("change", function() {
+
+    const files = [...this.files];
+
+    files.forEach(file => {
+
+        tracks.push({
+
+            name: file.name,
+
+            url: URL.createObjectURL(file)
+
+        });
+
+    });
+
+    renderLibrary();
+
+});
+
+
+/* =========================================================
+   RENDER LIBRARY
+========================================================= */
+
+function renderLibrary() {
+
+    libraryList.innerHTML = "";
+
+    if (tracks.length === 0) {
+
+        libraryList.innerHTML =
+            `<div class="empty">No music loaded yet.</div>`;
+
+        return;
+
+    }
+
+    tracks.forEach((track, index) => {
+
+        const div = document.createElement("div");
+
+        div.className = "track";
+
+        div.innerHTML = `
+
+            <span class="track-name">
+                🎵 ${escapeHTML(track.name)}
+            </span>
+
+            <button onclick="playTrack(${index})">
+                ▶ PLAY
+            </button>
+
+            <button onclick="addToQueue(${index})">
+                ➕ QUEUE
+            </button>
+
+            <button onclick="deleteTrack(${index})">
+                🗑
+            </button>
+
+        `;
+
+        libraryList.appendChild(div);
+
+    });
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   PLAY LIBRARY TRACK
+========================================================= */
+
+function playTrack(index) {
+
+    if (!tracks[index]) return;
+
+    queueMode = false;
+    queueIndex = -1;
+
+    currentIndex = index;
+
+    audio.src = tracks[index].url;
+
+    songTitle.textContent =
+        tracks[index].name;
+
+    audio.play();
+
+    playBtn.textContent = "⏸ PAUSE";
+
+    renderQueue();
+
+}
+
+
+/* =========================================================
+   PLAY / PAUSE
+========================================================= */
+
+playBtn.addEventListener("click", () => {
+
+    if (!audio.src) {
+
+        if (tracks.length > 0) {
+
+            playTrack(0);
+
+        }
+
+        return;
+
+    }
+
+    if (audio.paused) {
+
+        audio.play();
+
+        playBtn.textContent =
+            "⏸ PAUSE";
+
+    } else {
+
+        audio.pause();
+
+        playBtn.textContent =
+            "▶ PLAY";
+
+    }
+
+});
+
+
+/* =========================================================
+   NEXT TRACK
+========================================================= */
+
+function nextTrack() {
+
+    /*
+       If queue mode is active, always continue
+       to the next queue item.
+    */
+
+    if (queueMode && queue.length > 0) {
+
+        queueIndex++;
+
+        if (queueIndex >= queue.length) {
+
+            queueMode = false;
+
+            queueIndex = -1;
+
+            audio.pause();
+
+            audio.currentTime = 0;
+
+            playBtn.textContent =
+                "▶ PLAY";
+
+            songTitle.textContent =
+                "Queue finished";
+
+            renderQueue();
+
+            return;
+
+        }
+
+        playQueued(queueIndex);
+
+        return;
+
+    }
+
+
+    /*
+       Normal library playback
+    */
+
+    if (!tracks.length) return;
+
+    let index;
+
+    if (shuffle) {
+
+        index =
+            Math.floor(
+                Math.random() * tracks.length
+            );
+
+    } else {
+
+        index = currentIndex + 1;
+
+        if (index >= tracks.length) {
+
+            index = 0;
+
+        }
+
+    }
+
+    playTrack(index);
+
+}
+
+
+/* =========================================================
+   NEXT BUTTON
+========================================================= */
+
+nextBtn.addEventListener("click", () => {
+
+    nextTrack();
+
+});
+
+
+/* =========================================================
+   PREVIOUS
+========================================================= */
+
+prevBtn.addEventListener("click", () => {
+
+    if (!tracks.length) return;
+
+    let index =
+        currentIndex - 1;
+
+    if (index < 0) {
+
+        index =
+            tracks.length - 1;
+
+    }
+
+    playTrack(index);
+
+});
+
+
+/* =========================================================
+   SONG ENDED
+========================================================= */
+
+audio.addEventListener("ended", () => {
+
+    if (repeat) {
+
+        audio.currentTime = 0;
+
+        audio.play();
+
+        return;
+
+    }
+
+
+    /*
+       If the user is currently playing a normal
+       library track and has created a queue,
+       begin the queue when that song finishes.
+    */
+
+    if (!queueMode && queue.length > 0) {
+
+        queueMode = true;
+
+        queueIndex = 0;
+
+        playQueued(0);
+
+        return;
+
+    }
+
+
+    nextTrack();
+
+});
+
+
+/* =========================================================
+   ADD SONG TO QUEUE
+========================================================= */
+
+function addToQueue(index) {
+
+    if (!tracks[index]) return;
+
+    queue.push({
+
+        name: tracks[index].name,
+
+        url: tracks[index].url,
+
+        libraryIndex: index
+
+    });
+
+    renderQueue();
+
+}
+
+
+/* =========================================================
+   PLAY QUEUED SONG
+========================================================= */
+
+function playQueued(index) {
+
+    if (!queue[index]) return;
+
+    queueMode = true;
+
+    queueIndex = index;
+
+    const item = queue[index];
+
+    currentIndex =
+        item.libraryIndex;
+
+    audio.src = item.url;
+
+    songTitle.textContent =
+        item.name;
+
+    audio.play();
+
+    playBtn.textContent =
+        "⏸ PAUSE";
+
+    renderQueue();
+
+}
+
+
+/* =========================================================
+   PLAY QUEUE
+========================================================= */
+
+document
+.getElementById("playQueueBtn")
+.addEventListener("click", () => {
+
+    if (queue.length === 0) {
+
+        alert("The queue is empty.");
+
+        return;
+
+    }
+
+    queueMode = true;
+
+    queueIndex = 0;
+
+    playQueued(0);
+
+});
+
+
+/* =========================================================
+   RENDER QUEUE
+========================================================= */
+
+function renderQueue() {
+
+    queueList.innerHTML = "";
+
+    if (queue.length === 0) {
+
+        queueList.innerHTML =
+            `<div class="empty">Queue is empty.</div>`;
+
+        return;
+
+    }
+
+    queue.forEach((item, index) => {
+
+        const div =
+            document.createElement("div");
+
+        div.className = "queue-track";
+
+        if (
+            queueMode &&
+            index === queueIndex
+        ) {
+
+            div.classList.add(
+                "queue-playing"
+            );
+
+        }
+
+        div.innerHTML = `
+
+            <span class="queue-number">
+                ${index + 1}
+            </span>
+
+            <span class="queue-name">
+                🎵 ${escapeHTML(item.name)}
+            </span>
+
+            <button onclick="playQueued(${index})">
+                ▶
+            </button>
+
+            <button onclick="moveQueueUp(${index})">
+                ↑
+            </button>
+
+            <button onclick="moveQueueDown(${index})">
+                ↓
+            </button>
+
+            <button onclick="removeFromQueue(${index})">
+                ✕
+            </button>
+
+        `;
+
+        queueList.appendChild(div);
+
+    });
+
+}
+
+
+/* =========================================================
+   REMOVE FROM QUEUE
+========================================================= */
+
+function removeFromQueue(index) {
+
+    if (
+        queueMode &&
+        index === queueIndex
+    ) {
+
+        return;
+
+    }
+
+    queue.splice(index, 1);
+
+    if (
+        queueIndex > index
+    ) {
+
+        queueIndex--;
+
+    }
+
+    renderQueue();
+
+}
+
+
+/* =========================================================
+   MOVE QUEUE UP
+========================================================= */
+
+function moveQueueUp(index) {
+
+    if (index <= 0) return;
+
+    const temp =
+        queue[index - 1];
+
+    queue[index - 1] =
+        queue[index];
+
+    queue[index] =
+        temp;
+
+    if (queueIndex === index) {
+
+        queueIndex--;
+
+    } else if (
+        queueIndex === index - 1
+    ) {
+
+        queueIndex++;
+
+    }
+
+    renderQueue();
+
+}
+
+
+/* =========================================================
+   MOVE QUEUE DOWN
+========================================================= */
+
+function moveQueueDown(index) {
+
+    if (
+        index >= queue.length - 1
+    ) return;
+
+    const temp =
+        queue[index + 1];
+
+    queue[index + 1] =
+        queue[index];
+
+    queue[index] =
+        temp;
+
+    if (queueIndex === index) {
+
+        queueIndex++;
+
+    } else if (
+        queueIndex === index + 1
+    ) {
+
+        queueIndex--;
+
+    }
+
+    renderQueue();
+
+}
+
+
+/* =========================================================
+   CLEAR QUEUE
+========================================================= */
+
+document
+.getElementById("clearQueueBtn")
+.addEventListener("click", () => {
+
+    queue = [];
+
+    queueIndex = -1;
+
+    queueMode = false;
+
+    renderQueue();
+
+});
+
+
+/* =========================================================
+   DELETE LIBRARY TRACK
+========================================================= */
+
+function deleteTrack(index) {
+
+    if (
+        index === currentIndex
+    ) {
+
+        audio.pause();
+
+        audio.src = "";
+
+        songTitle.textContent =
+            "No song loaded";
+
+        playBtn.textContent =
+            "▶ PLAY";
+
+        currentIndex = -1;
+
+    }
+
+    tracks.splice(index, 1);
+
+    /*
+       Update library indexes inside queue
+    */
+
+    queue = queue.filter(
+        item => item.libraryIndex !== index
+    );
+
+    queue.forEach(item => {
+
+        if (
+            item.libraryIndex > index
+        ) {
+
+            item.libraryIndex--;
+
+        }
+
+    });
+
+    renderLibrary();
+
+    renderQueue();
+
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+audio.addEventListener("loadedmetadata", () => {
+
+    durationDisplay.textContent =
+        formatTime(audio.duration);
+
+});
+
+
+audio.addEventListener("timeupdate", () => {
+
+    if (!audio.duration) return;
+
+    progress.value =
+        (audio.currentTime /
+        audio.duration) * 100;
+
+    currentTimeDisplay.textContent =
+        formatTime(audio.currentTime);
+
+});
+
+
+progress.addEventListener("input", () => {
+
+    if (!audio.duration) return;
+
+    audio.currentTime =
+        (progress.value / 100) *
+        audio.duration;
+
+});
+
+
+function formatTime(seconds) {
+
+    if (!seconds || isNaN(seconds)) {
+
+        return "0:00";
+
+    }
+
+    const mins =
+        Math.floor(seconds / 60);
+
+    const secs =
+        Math.floor(seconds % 60);
+
+    return mins + ":" +
+        String(secs).padStart(2, "0");
+
+}
+
+
+/* =========================================================
+   VOLUME
+========================================================= */
+
+volume.addEventListener("input", () => {
+
+    audio.volume =
+        volume.value;
+
+    muted = false;
+
+    muteBtn.textContent =
+        "🔇 MUTE";
+
+});
+
+
+/* =========================================================
+   MUTE
+========================================================= */
+
+muteBtn.addEventListener("click", () => {
+
+    muted = !muted;
+
+    audio.muted = muted;
+
+    muteBtn.textContent =
+        muted
+        ? "🔊 UNMUTE"
+        : "🔇 MUTE";
+
+});
+
+
+/* =========================================================
+   SHUFFLE
+========================================================= */
+
+shuffleBtn.addEventListener("click", () => {
+
+    shuffle = !shuffle;
+
+    shuffleBtn.classList.toggle(
+        "active",
+        shuffle
+    );
+
+});
+
+
+/* =========================================================
+   REPEAT
+========================================================= */
+
+repeatBtn.addEventListener("click", () => {
+
+    repeat = !repeat;
+
+    repeatBtn.classList.toggle(
+        "active",
+        repeat
+    );
+
+});
+
+
+/* =========================================================
+   KEYBOARD CONTROLS
+========================================================= */
+
+document.addEventListener("keydown", e => {
+
+    if (
+        e.target.tagName === "INPUT"
+    ) return;
+
+
+    if (e.code === "Space") {
+
+        e.preventDefault();
+
+        playBtn.click();
+
+    }
+
+
+    if (e.key === "ArrowRight") {
+
+        audio.currentTime += 5;
+
+    }
+
+
+    if (e.key === "ArrowLeft") {
+
+        audio.currentTime -= 5;
+
+    }
+
+
+    if (e.key === "ArrowUp") {
+
+        audio.volume =
+            Math.min(
+                1,
+                audio.volume + .05
+            );
+
+        volume.value =
+            audio.volume;
+
+    }
+
+
+    if (e.key === "ArrowDown") {
+
+        audio.volume =
+            Math.max(
+                0,
+                audio.volume - .05
+            );
+
+        volume.value =
+            audio.volume;
+
+    }
+
+
+    if (
+        e.key.toLowerCase() === "n"
+    ) {
+
+        nextTrack();
+
+    }
+
+
+    if (
+        e.key.toLowerCase() === "p"
+    ) {
+
+        prevBtn.click();
+
+    }
+
+
+    if (
+        e.key.toLowerCase() === "m"
+    ) {
+
+        muteBtn.click();
+
+    }
+
+});
+
+
+/* =========================================================
+   DJ DECKS
+========================================================= */
+
+const deckA = new Audio();
+const deckB = new Audio();
+
+let deckAFile = null;
+let deckBFile = null;
+
+
+/* =========================================================
+   DECK A
+========================================================= */
+
+document
+.getElementById("loadABtn")
+.addEventListener("click", () => {
+
+    if (!tracks.length) {
+
+        alert("Load music into the library first.");
+
+        return;
+
+    }
+
+    const index =
+        currentIndex >= 0
+        ? currentIndex
+        : 0;
+
+    deckA.src =
+        tracks[index].url;
+
+    deckAFile =
+        tracks[index].name;
+
+    document
+    .getElementById("deckATitle")
+    .textContent =
+        deckAFile;
+
+});
+
+
+document
+.getElementById("playABtn")
+.addEventListener("click", () => {
+
+    if (!deckA.src) return;
+
+    if (deckA.paused) {
+
+        deckA.play();
+
+        document
+        .getElementById("playABtn")
+        .textContent =
+            "⏸ PAUSE";
+
+    } else {
+
+        deckA.pause();
+
+        document
+        .getElementById("playABtn")
+        .textContent =
+            "▶ PLAY";
+
+    }
+
+});
+
+
+document
+.getElementById("stopABtn")
+.addEventListener("click", () => {
+
+    deckA.pause();
+
+    deckA.currentTime = 0;
+
+    document
+    .getElementById("playABtn")
+    .textContent =
+        "▶ PLAY";
+
+});
+
+
+document
+.getElementById("cueABtn")
+.addEventListener("click", () => {
+
+    if (!deckA.src) return;
+
+    deckA.currentTime = 0;
+
+});
+
+
+/* =========================================================
+   DECK B
+========================================================= */
+
+document
+.getElementById("loadBBtn")
+.addEventListener("click", () => {
+
+    if (!tracks.length) {
+
+        alert("Load music into the library first.");
+
+        return;
+
+    }
+
+    const index =
+        currentIndex >= 0
+        ? currentIndex
+        : 0;
+
+    deckB.src =
+        tracks[index].url;
+
+    deckBFile =
+        tracks[index].name;
+
+    document
+    .getElementById("deckBTitle")
+    .textContent =
+        deckBFile;
+
+});
+
+
+document
+.getElementById("playBBtn")
+.addEventListener("click", () => {
+
+    if (!deckB.src) return;
+
+    if (deckB.paused) {
+
+        deckB.play();
+
+        document
+        .getElementById("playBBtn")
+        .textContent =
+            "⏸ PAUSE";
+
+    } else {
+
+        deckB.pause();
+
+        document
+        .getElementById("playBBtn")
+        .textContent =
+            "▶ PLAY";
+
+    }
+
+});
+
+
+document
+.getElementById("stopBBtn")
+.addEventListener("click", () => {
+
+    deckB.pause();
+
+    deckB.currentTime = 0;
+
+    document
+    .getElementById("playBBtn")
+    .textContent =
+        "▶ PLAY";
+
+});
+
+
+document
+.getElementById("cueBBtn")
+.addEventListener("click", () => {
+
+    if (!deckB.src) return;
+
+    deckB.currentTime = 0;
+
+});
+
+
+/* =========================================================
+   DECK VOLUMES
+========================================================= */
+
+const volA =
+    document.getElementById("volA");
+
+const volB =
+    document.getElementById("volB");
+
+
+volA.addEventListener("input", () => {
+
+    deckA.volume =
+        volA.value;
+
+    document
+    .getElementById("volAValue")
+    .textContent =
+        Math.round(
+            volA.value * 100
+        ) + "%";
+
+});
+
+
+volB.addEventListener("input", () => {
+
+    deckB.volume =
+        volB.value;
+
+    document
+    .getElementById("volBValue")
+    .textContent =
+        Math.round(
+            volB.value * 100
+        ) + "%";
+
+});
+
+
+/* =========================================================
+   PITCH CONTROLS
+========================================================= */
+
+const pitchA =
+    document.getElementById("pitchA");
+
+const pitchB =
+    document.getElementById("pitchB");
+
+
+pitchA.addEventListener("input", () => {
+
+    const value =
+        Number(pitchA.value);
+
+    deckA.playbackRate =
+        1 + (value / 100);
+
+    document
+    .getElementById("pitchAValue")
+    .textContent =
+        value;
+
+});
+
+
+pitchB.addEventListener("input", () => {
+
+    const value =
+        Number(pitchB.value);
+
+    deckB.playbackRate =
+        1 + (value / 100);
+
+    document
+    .getElementById("pitchBValue")
+    .textContent =
+        value;
+
+});
+
+
+/* =========================================================
+   TEMPO
+========================================================= */
+
+document
+.getElementById("tempoA")
+.addEventListener("input", e => {
+
+    deckA.playbackRate =
+        Number(e.target.value);
+
+});
+
+
+document
+.getElementById("tempoB")
+.addEventListener("input", e => {
+
+    deckB.playbackRate =
+        Number(e.target.value);
+
+});
+
+
+/* =========================================================
+   JOG WHEELS
+========================================================= */
+
+function setupJogWheel(
+    element,
+    deck
+) {
+
+    let dragging = false;
+    let previousY = 0;
+
+    element.addEventListener(
+        "mousedown",
+        e => {
+
+            dragging = true;
+
+            previousY =
+                e.clientY;
+
+        }
+    );
+
+
+    document.addEventListener(
+        "mouseup",
+        () => {
+
+            dragging = false;
+
+        }
+    );
+
+
+    document.addEventListener(
+        "mousemove",
+        e => {
+
+            if (!dragging) return;
+
+            const difference =
+                e.clientY - previousY;
+
+            previousY =
+                e.clientY;
+
+            deck.currentTime =
+                Math.max(
+                    0,
+                    deck.currentTime +
+                    difference * .03
+                );
+
+        }
+    );
+
+}
+
+
+setupJogWheel(
+    document.getElementById("jogA"),
+    deckA
+);
+
+setupJogWheel(
+    document.getElementById("jogB"),
+    deckB
+);
+
+
+/* =========================================================
+   CROSS FADER
+========================================================= */
+
+const crossfader =
+    document.getElementById("crossfader");
+
+const masterVolume =
+    document.getElementById("masterVolume");
+
+
+crossfader.addEventListener(
+    "input",
+    () => {
+
+        const value =
+            Number(crossfader.value);
+
+        const a =
+            1 - value / 100;
+
+        const b =
+            value / 100;
+
+        deckA.volume =
+            a * Number(volA.value);
+
+        deckB.volume =
+            b * Number(volB.value);
+
+    }
+);
+
+
+/* =========================================================
+   MASTER VOLUME
+========================================================= */
+
+masterVolume.addEventListener(
+    "input",
+    () => {
+
+        const master =
+            Number(masterVolume.value);
+
+        audio.volume =
+            master;
+
+    }
+);
+
+
+/* =========================================================
+   EQ CONTROLS
+========================================================= */
+
+function setupEQ(
+    inputID,
+    outputID
+) {
+
+    const input =
+        document.getElementById(inputID);
+
+    const output =
+        document.getElementById(outputID);
+
+    input.addEventListener(
+        "input",
+        () => {
+
+            output.textContent =
+                input.value;
+
+        }
+    );
+
+}
+
+
+setupEQ(
+    "bassA",
+    "bassAValue"
+);
+
+setupEQ(
+    "midA",
+    "midAValue"
+);
+
+setupEQ(
+    "trebleA",
+    "trebleAValue"
+);
+
+setupEQ(
+    "bassB",
+    "bassBValue"
+);
+
+setupEQ(
+    "midB",
+    "midBValue"
+);
+
+setupEQ(
+    "trebleB",
+    "trebleBValue"
+);
+
+
+/* =========================================================
+   EFFECT BUTTONS
+========================================================= */
+
+const effectButtons =
+    document.querySelectorAll(
+        ".effect"
+    );
+
+
+effectButtons.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            button.classList.toggle(
+                "active"
+            );
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   RESET EFFECTS
+========================================================= */
+
+document
+.getElementById("resetEffectsBtn")
+.addEventListener("click", () => {
+
+    effectButtons.forEach(
+        button => {
+
+            button.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   INITIAL SETTINGS
+========================================================= */
+
+audio.volume = 1;
+
+deckA.volume = 1;
+
+deckB.volume = 1;
+
+renderLibrary();
+
+renderQueue();
+
+</script>
+
+</body>
+</html>
